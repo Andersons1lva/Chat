@@ -57,7 +57,26 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.materialIconsExtended)
             implementation(compose.ui)
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
 
+            val room_version = "2.8.4"
+
+            implementation("androidx.room:room-runtime:$room_version")
+
+            // optional - Kotlin Extensions and Coroutines support for Room
+            implementation("androidx.room:room-ktx:$room_version")
+
+            // optional - RxJava2 support for Room
+            implementation("androidx.room:room-rxjava2:$room_version")
+
+            // optional - RxJava3 support for Room
+            implementation("androidx.room:room-rxjava3:$room_version")
+
+            // optional - Guava support for Room, including Optional and ListenableFuture
+            implementation("androidx.room:room-guava:$room_version")
+
+            // optional - Paging 3 Integration
+            implementation("androidx.room:room-paging:$room_version")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

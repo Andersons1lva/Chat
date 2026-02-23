@@ -5,13 +5,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.AddTask
 import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.RemoveRoad
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,51 +18,53 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.anderson.chatui.data.Author
+import dev.anderson.chatui.data.Message
+import kotlin.time.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 
 @Composable
-@Preview
+@Preview(widthDp = 1000)
 fun ChatApp() {
     val chats = listOf(
-        ChatItem("Maria Silva", "Olá, como você está?", "14:30"),
-        ChatItem("João Santos", "Tudo bem?", "Ontem")
+        Author(
+            "Maria Silva",
+            "Olá, como você está?",
+            Instant.parse("2026-02-21T20:57:12.844116200Z")
+        ),
+        Author("João Santos", "Tudo bem?", Instant.parse("2026-02-21T20:57:12.844116200Z"))
     )
     var selectedChat by remember { mutableStateOf(chats[0]) }
     val messages = listOf(
-        Message("Olá, tudo bem?", isOwn = false, time = "14:30"),
-        Message("Tudo ótimo! E você?", isOwn = true, time = "14:31"),
-        Message("Estou bem também.", isOwn = false, time = "14:32")
+        Message(
+            1,
+            "Olá, tudo bem?",
+            isPropria = false,
+            timestamp = Instant.parse("2026-02-21T20:57:12.844116200Z"),
+            contents = "",
+            replyTo = null
+        ),
+        Message(
+            2,
+            "Tudo ótimo! E você?",
+            isPropria = true,
+            timestamp = Instant.parse("2026-02-21T20:57:12.844116200Z"),
+            contents = "",
+            replyTo = null
+        ),
+        Message(
+            3,
+            "Estou bem também.",
+            isPropria = false,
+            timestamp = Instant.parse("2026-02-21T20:57:12.844116200Z"),
+            contents = "",
+            replyTo = null
+        )
     )
 
     MaterialTheme {
-//        Scaffold(
-//            bottomBar = { ChatInput() }
-//        ) { padding ->
-//            Row(
-//                Modifier
-//                    .fillMaxWidth()
-//                    .padding(padding),
-//                horizontalArrangement = Arrangement.SpaceBetween
-//            ) {
-//                // Sidebar de conversas
-//                ChatList(
-//                    chats = chats,
-//                    selectedChat = selectedChat,
-//                    onSelect = { selectedChat = it },
-//                    modifier = Modifier
-//                        .weight(0.25f)
-//                        .fillMaxHeight()
-//                )
-//
-//                // Área de mensagens
-//                ChatMessages(messages = messages, modifier = Modifier.weight(1f))
-//                ChatDetails(
-//                    chat = selectedChat,
-//                    chats = chats,
-//                    selectedChat = selectedChat,
-//                    onSelect = { selectedChat = it })
-//            }
-//        }
         Scaffold { padding ->
 
             Box(
@@ -130,17 +127,15 @@ fun ChatApp() {
         }
 
 
-
     }
 }
 
-data class ChatItem(val name: String, val lastMessage: String, val time: String)
 
 @Composable
 fun ChatList(
-    chats: List<ChatItem>,
-    selectedChat: ChatItem,
-    onSelect: (ChatItem) -> Unit,
+    chats: List<Author>,
+    selectedChat: Author,
+    onSelect: (Author) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(modifier = modifier.width(300.dp).fillMaxHeight()) {
@@ -157,7 +152,7 @@ fun ChatList(
 }
 
 @Composable
-fun ChatListItem(chat: ChatItem, isSelected: Boolean, onClick: () -> Unit) {
+fun ChatListItem(chat: Author, isSelected: Boolean, onClick: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -175,12 +170,12 @@ fun ChatListItem(chat: ChatItem, isSelected: Boolean, onClick: () -> Unit) {
             Text(chat.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             Text(chat.lastMessage, fontSize = 14.sp, color = Color.Gray)
         }
-        Text(chat.time, fontSize = 12.sp, color = Color.Gray)
+        Text(chat.time.toHourMinute(), fontSize = 12.sp, color = Color.Gray)
     }
 }
 
 @Composable
-fun ChatItemRecebidos(chat: ChatItem, isSelected: Boolean, onClick: () -> Unit) {
+fun ChatItemRecebidos(chat: Author, isSelected: Boolean, onClick: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -195,12 +190,12 @@ fun ChatItemRecebidos(chat: ChatItem, isSelected: Boolean, onClick: () -> Unit) 
             Text(chat.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             Text(chat.lastMessage, fontSize = 14.sp, color = Color.Gray)
         }
-        Text(chat.time, fontSize = 12.sp, color = Color.Gray)
+        Text(chat.time.toHourMinute(), fontSize = 12.sp, color = Color.Gray)
     }
 }
 
 @Composable
-fun ChatItemNaoRecebidos(chat: ChatItem, isSelected: Boolean, onClick: () -> Unit) {
+fun ChatItemNaoRecebidos(chat: Author, isSelected: Boolean, onClick: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -215,12 +210,9 @@ fun ChatItemNaoRecebidos(chat: ChatItem, isSelected: Boolean, onClick: () -> Uni
             Text(chat.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             Text(chat.lastMessage, fontSize = 14.sp, color = Color.Gray)
         }
-        Text(chat.time, fontSize = 12.sp, color = Color.Gray)
+        Text(chat.time.toHourMinute(), fontSize = 12.sp, color = Color.Gray)
     }
 }
-
-
-data class Message(val text: String, val isOwn: Boolean, val time: String)
 
 @Composable
 fun ChatMessages(messages: List<Message>, modifier: Modifier = Modifier) {
@@ -240,30 +232,30 @@ fun ChatMessages(messages: List<Message>, modifier: Modifier = Modifier) {
 @Composable
 fun MessageBubble(message: Message) {
     Row(
-        horizontalArrangement = if (message.isOwn) Arrangement.End else Arrangement.Start,
+        horizontalArrangement = if (message.isPropria) Arrangement.End else Arrangement.Start,
         modifier = Modifier.fillMaxWidth()
     ) {
-        if (!message.isOwn) {
+        if (!message.isPropria) {
             ImageAvatar("Maria")
             Spacer(Modifier.width(8.dp))
         }
         Card(
-            shape = if (message.isOwn) RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp)
+            shape = if (message.isPropria) RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp)
             else RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp),
             colors = CardDefaults.cardColors(
-                containerColor = if (message.isOwn) Color(0xFF007AFF) else Color.LightGray
+                containerColor = if (message.isPropria) Color(0xFF007AFF) else Color.LightGray
             )
         ) {
             Text(
-                text = message.text,
+                text = message.author,
                 modifier = Modifier.padding(12.dp),
-                color = if (message.isOwn) Color.White else Color.Black,
+                color = if (message.isPropria) Color.White else Color.Black,
                 fontSize = 16.sp
             )
         }
-        if (message.isOwn) {
+        if (message.isPropria) {
             Text(
-                message.time,
+                message.timestamp.toHourMinute(),
                 modifier = Modifier.padding(start = 8.dp),
                 fontSize = 12.sp,
                 color = Color.Gray
@@ -271,6 +263,13 @@ fun MessageBubble(message: Message) {
         }
     }
 }
+
+
+fun Instant.toHourMinute(): String {
+    val local = this.toLocalDateTime(TimeZone.currentSystemDefault())
+    return "${local.hour.toString().padStart(2, '0')}:${local.minute.toString().padStart(2, '0')}"
+}
+
 
 @Composable
 fun ImageAvatar(name: String, modifier: Modifier = Modifier) {
@@ -296,24 +295,36 @@ fun ChatInput(modifier: Modifier = Modifier) {
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        var textState by remember { mutableStateOf("") }
+        val isChatEmpty = textState.isBlank()
 
         OutlinedTextField(
-            value = "",
-            onValueChange = {},
+            value = textState,
+            onValueChange = { texto -> textState = texto },
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(24.dp),
             placeholder = { Text("Digite uma mensagem") },
-            trailingIcon = { Icon(Icons.Default.Send, contentDescription = null) }
+            trailingIcon = {
+                IconButton(
+                    onClick = {
+                            println("Mensagem enviada: $textState")
+                            textState = ""
+                    },
+                    enabled = !isChatEmpty
+                ) {
+                    Icon(Icons.Default.Send, contentDescription = "Enviar")
+                }
+            }
         )
     }
 }
 
 @Composable
 fun ChatDetails(
-    chat: ChatItem,
-    chats: List<ChatItem>,
-    selectedChat: ChatItem,
-    onSelect: (ChatItem) -> Unit,
+    chat: Author,
+    chats: List<Author>,
+    selectedChat: Author,
+    onSelect: (Author) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
