@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +29,7 @@ import kotlinx.datetime.toLocalDateTime
 @Composable
 @Preview(widthDp = 1000)
 fun ChatApp() {
+
     val chats = listOf(
         Author(
             "Maria Silva",
@@ -36,33 +38,57 @@ fun ChatApp() {
         ),
         Author("João Santos", "Tudo bem?", Instant.parse("2026-02-21T20:57:12.844116200Z"))
     )
+
     var selectedChat by remember { mutableStateOf(chats[0]) }
-    val messages = listOf(
-        Message(
-            1,
-            "Olá, tudo bem?",
-            isPropria = false,
-            timestamp = Instant.parse("2026-02-21T20:57:12.844116200Z"),
-            contents = "",
-            replyTo = null
+
+    val messagesByContact = mapOf(
+        "Maria Silva" to listOf(
+            Message(
+                1,
+                "Olá, tudo bem?",
+                isPropria = false,
+                timestamp = Instant.parse("2026-02-21T20:57:12.844116200Z"),
+                contents = "",
+                replyTo = null
+            ),
+            Message(
+                2,
+                "Tudo ótimo! E você?",
+                isPropria = true,
+                timestamp = Instant.parse("2026-02-21T20:58:12.844116200Z"),
+                contents = "",
+                replyTo = null
+            ),
+            Message(
+                3,
+                "Estou bem também.",
+                isPropria = false,
+                timestamp = Instant.parse("2026-02-21T20:59:12.844116200Z"),
+                contents = "",
+                replyTo = null
+            )
         ),
-        Message(
-            2,
-            "Tudo ótimo! E você?",
-            isPropria = true,
-            timestamp = Instant.parse("2026-02-21T20:57:12.844116200Z"),
-            contents = "",
-            replyTo = null
-        ),
-        Message(
-            3,
-            "Estou bem também.",
-            isPropria = false,
-            timestamp = Instant.parse("2026-02-21T20:57:12.844116200Z"),
-            contents = "",
-            replyTo = null
+        "João Santos" to listOf(
+            Message(
+                4,
+                "E aí João, blz?",
+                isPropria = true,
+                timestamp = Instant.parse("2026-02-21T19:30:00.000Z"),
+                contents = "",
+                replyTo = null
+            ),
+            Message(
+                5,
+                "Tudo bem?",
+                isPropria = false,
+                timestamp = Instant.parse("2026-02-21T20:57:12.844116200Z"),
+                contents = "",
+                replyTo = null
+            )
         )
     )
+
+    val currentMessages = messagesByContact[selectedChat.name] ?: emptyList()
 
     MaterialTheme {
         Scaffold { padding ->
@@ -86,7 +112,7 @@ fun ChatApp() {
                     )
 
                     ChatMessages(
-                        messages = messages,
+                        messages = currentMessages,
                         modifier = Modifier
                             .weight(0.5f)
                             .fillMaxHeight()
@@ -125,8 +151,6 @@ fun ChatApp() {
                 }
             }
         }
-
-
     }
 }
 
@@ -223,20 +247,20 @@ fun ChatMessages(messages: List<Message>, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(messages.reversed()) { message ->
-                MessageBubble(message)
+                MessageCenter(message)
             }
         }
     }
 }
 
 @Composable
-fun MessageBubble(message: Message) {
+fun MessageCenter(message: Message) {
     Row(
         horizontalArrangement = if (message.isPropria) Arrangement.End else Arrangement.Start,
         modifier = Modifier.fillMaxWidth()
     ) {
         if (!message.isPropria) {
-            ImageAvatar("Maria")
+            ImageAvatar(message.author ?: "Desconhecido")
             Spacer(Modifier.width(8.dp))
         }
         Card(
@@ -247,7 +271,7 @@ fun MessageBubble(message: Message) {
             )
         ) {
             Text(
-                text = message.author,
+                text = message.author ?: "",
                 modifier = Modifier.padding(12.dp),
                 color = if (message.isPropria) Color.White else Color.Black,
                 fontSize = 16.sp
@@ -295,7 +319,7 @@ fun ChatInput(modifier: Modifier = Modifier) {
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        var textState by remember { mutableStateOf("") }
+        var textState by rememberSaveable { mutableStateOf("") }
         val isChatEmpty = textState.isBlank()
 
         OutlinedTextField(
@@ -307,8 +331,10 @@ fun ChatInput(modifier: Modifier = Modifier) {
             trailingIcon = {
                 IconButton(
                     onClick = {
-                            println("Mensagem enviada: $textState")
-                            textState = ""
+                        println("Mensagem enviada: $textState")
+                        // NOTA: Requer ajuste dependendo da estrutura real da data class Message
+                        // Message(author = textState)
+                        textState = ""
                     },
                     enabled = !isChatEmpty
                 ) {
@@ -405,9 +431,3 @@ fun ChatDetails(
         }
     }
 }
-
-
-
-
-
-
